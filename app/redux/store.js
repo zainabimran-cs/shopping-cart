@@ -6,3 +6,7 @@ export const store = configureStore({
         cart: cartReducer
     },  //	State ko update karne ka logic rakhta hai.
 })
+
+
+//Redux Store mein selected cart items honge.
+//page.js mein available products ki array hogi.

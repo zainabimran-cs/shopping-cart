@@ -6,18 +6,31 @@ import { addToCart, removeFromCart, incrementQuantity, decrementQuantity } from 
 export default function Home() {
 
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const totalPrice = cartItems.reduce(
-  (total, item) => total + item.price * item.quantity,
-  0
-);
+//   const totalPrice = cartItems.reduce(
+//   (total, item) => total + item.price * item.quantity,
+//   0
+// );
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();   //dispatch() = Action ko Redux Store tak bhejna.
 
-  const product = {
+ const product = {
     id: 1,
     name: "Laptop",
     price: 50000,
   };
+
+  // const products= [
+  //   {
+  //     id:1, 
+  //     name:"Laptop",
+  //     price: 50000,
+  //   },
+  //   {
+  //     id:2,
+  //     name:"Mobile",
+  //     price: 30000
+  //   }
+  // ]
 
   return (
     <div className="max-w-2xl mx-auto p-6 min-h-screen bg-gray-50">
@@ -69,7 +82,7 @@ export default function Home() {
           </div>
         </div>
       ))}
-      <h2 className="text-2xl font-bold text-gray-800 mt-6">Total Price: Rs. {totalPrice}</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-800 mt-6">Total Price: Rs. {totalPrice}</h2> */}
     </div>
   )
 }
