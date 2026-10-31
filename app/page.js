@@ -6,38 +6,40 @@ import { addToCart, removeFromCart, incrementQuantity, decrementQuantity } from 
 export default function Home() {
 
   const cartItems = useSelector((state) => state.cart.cartItems);
-//   const totalPrice = cartItems.reduce(
-//   (total, item) => total + item.price * item.quantity,
-//   0
-// );
+
 
   const dispatch = useDispatch();   //dispatch() = Action ko Redux Store tak bhejna.
 
- const product = {
-    id: 1,
-    name: "Laptop",
-    price: 50000,
-  };
+//  const product = {
+//     id: 1,
+//     name: "Laptop",
+//     price: 50000,
+//   };
 
-  // const products= [
-  //   {
-  //     id:1, 
-  //     name:"Laptop",
-  //     price: 50000,
-  //   },
-  //   {
-  //     id:2,
-  //     name:"Mobile",
-  //     price: 30000
-  //   }
-  // ]
+  const products= [
+    {
+      id:1, 
+      name:"Laptop",
+      price: 50000,
+    },
+    {
+      id:2,
+      name:"Mobile",
+      price: 30000
+    }
+  ]
 
   return (
     <div className="max-w-2xl mx-auto p-6 min-h-screen bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
 
+{products.map((product)=>(
 
-      <div className="bg-white rounded-xl shadow p-5 mb-6">
+  // React mein jab hum .map() se multiple elements show karte hain, to React ko har element ki unique identity deni hoti hai.
+
+// Is identity ke liye hum key use karte hain.
+
+      <div key={product.id} className="bg-white rounded-xl shadow p-5 mb-6">
         <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
         <p className="text-gray-600 mt-1 mb-4">Price: Rs. {product.price}</p>
 
@@ -48,8 +50,11 @@ export default function Home() {
           Add to Cart
         </button>
       </div>
+))}
+
 
       {cartItems.map((item) => (
+        //Cart items show karna
         
         <div key={item.id} className="bg-white rounded-xl shadow p-5 mb-4">
           <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
@@ -82,7 +87,6 @@ export default function Home() {
           </div>
         </div>
       ))}
-      {/* <h2 className="text-2xl font-bold text-gray-800 mt-6">Total Price: Rs. {totalPrice}</h2> */}
     </div>
   )
 }

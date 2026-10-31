@@ -9,10 +9,10 @@ const cartSlice = createSlice({
     initialState,    //initialState ka matlab hai application ke start hone par state mein konsa data hoga.
     reducers: { //State update karne ke functions rakhta hai.
         //addToCart: (state, action) => {       // addTOCart ->	Reducer function ka naam
-        // state.cartItems.push(action.payload);    //	action -> Jo information reducer ko milti hai
+        //state.cartItems.push(action.payload);    //	action -> Jo information reducer ko milti hai
         //action.payload ->	Jo product add karna hai (Product ki information)
-        // push() -> Product ko array mein add karta hai
-
+        //push() -> Product ko array mein add karta hai
+        //}
 
 
         //Quantity Increment aur Decrement 
@@ -26,6 +26,9 @@ const cartSlice = createSlice({
                 (item) => item.id === action.payload.id
             );
 
+            //    item.id = cart ke existing product ki ID
+            // action.payload.id = naye selected product ki ID.
+
             if (existingItem) {
                 existingItem.quantity += 1;   //yes-> Existing quantity mein 1 add hoga
             } else {
@@ -38,10 +41,8 @@ const cartSlice = createSlice({
 
         removeFromCart: (state, action) => {
             state.cartItems = state.cartItems.filter(
-                (item) => item.id !== action.payload
-            );
+                (item) => item.id !== action.payload);
         },
-
 
         incrementQuantity: (state, action) => { //  incrementQuantity->Reducer ka name hai.
             const item = state.cartItems.find(
@@ -53,18 +54,24 @@ const cartSlice = createSlice({
             }
         },
 
+        // decrementQuantity:(state, action)=>{
+        //     const item= state.cartItems.find(
+        //         (item)=>item.id === action.payload
+        //     );
+        //     if(item){
+        //         item.quantity -=1;
+        //     }
+        // },
+
         decrementQuantity: (state, action) => {
             const item = state.cartItems.find(
-                (item) => item.id === action.payload
+                (item) => item.id === action.payload  
             );
 
-            if (item && item.quantity > 1) {
+            if (item && item.quantity > 1) { //item check karta hai ke product exist karta hai cart ma
                 item.quantity -= 1;       //Iska matlab quantity 1 ho to decrement nahi hogi.
             }
         },
-
-
-
 
     }
 });
