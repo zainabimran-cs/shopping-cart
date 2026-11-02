@@ -10,12 +10,6 @@ export default function Home() {
 
   const dispatch = useDispatch();   //dispatch() = Action ko Redux Store tak bhejna.
 
-//  const product = {
-//     id: 1,
-//     name: "Laptop",
-//     price: 50000,
-//   };
-
   const products= [
     {
       id:1, 
@@ -91,62 +85,3 @@ export default function Home() {
   )
 }
 
-
-// "use client"
-
-// import { useSelector, useDispatch } from "react-redux";
-// import { addToCart, removeFromCart, incrementQuantity, decrementQuantity } from "./redux/cartSlice";
-
-// export default function Home() {
-
-//   const cartItems = useSelector((state) => state.cart.cartItems);
-//   const totalPrice = cartItems.reduce(
-//   (total, item) => total + item.price * item.quantity,
-//   0
-// );
-
-//   const dispatch = useDispatch();
-
-//   const product = {
-//     id: 1,
-//     name: "Laptop",
-//     price: 50000,
-//   };
-
-//   return (
-//     <div>
-//       <h1>Shopping Cart</h1>
-
-
-//       <h2>{product.name}</h2>
-//       <p>Price: Rs. {product.price}</p>
-
-//       <button onClick={() => dispatch(addToCart(product))}>
-//         Add to Cart
-//       </button>
-//       {cartItems.map((item) => (
-        
-//         <div key={item.id}>
-//           <h2>{item.name}</h2>
-
-//           <p>Price: Rs. {item.price}</p>
-
-//           <button onClick={() => dispatch(incrementQuantity(item.id))}>
-//             +
-//           </button>
-
-//           <span> Quantity: {item.quantity} </span>
-
-//           <button onClick={() => dispatch(decrementQuantity(item.id))}>
-//             -
-//           </button>
-
-//           <button onClick={() => dispatch(removeFromCart(item.id))}>
-//             Remove
-//           </button>
-//         </div>
-//       ))}
-//       <h2>Total Price: Rs. {totalPrice}</h2>
-//     </div>
-//   )
-// }

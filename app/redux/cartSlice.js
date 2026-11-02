@@ -8,11 +8,11 @@ const cartSlice = createSlice({
     name: "cart",  //Ye slice ka naam hai.
     initialState,    //initialState ka matlab hai application ke start hone par state mein konsa data hoga.
     reducers: { //State update karne ke functions rakhta hai.
-        //addToCart: (state, action) => {       // addTOCart ->	Reducer function ka naam
-        //state.cartItems.push(action.payload);    //	action -> Jo information reducer ko milti hai
+        // addTOCart ->	Reducer function ka naam
+        //	action -> Jo information reducer ko milti hai
         //action.payload ->	Jo product add karna hai (Product ki information)
         //push() -> Product ko array mein add karta hai
-        //}
+        //
 
 
         //Quantity Increment aur Decrement 
@@ -54,18 +54,9 @@ const cartSlice = createSlice({
             }
         },
 
-        // decrementQuantity:(state, action)=>{
-        //     const item= state.cartItems.find(
-        //         (item)=>item.id === action.payload
-        //     );
-        //     if(item){
-        //         item.quantity -=1;
-        //     }
-        // },
-
         decrementQuantity: (state, action) => {
             const item = state.cartItems.find(
-                (item) => item.id === action.payload  
+                (item) => item.id === action.payload
             );
 
             if (item && item.quantity > 1) { //item check karta hai ke product exist karta hai cart ma
