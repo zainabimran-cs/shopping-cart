@@ -1,9 +1,14 @@
+function handleError(response, data) {
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch products");
+  }
+}
+
 export async function getProducts() {
   const response = await fetch("/api/products");
+  const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch products");
-  }
+  handleError(response, data);
 
-  return response.json();
+  return data;
 }

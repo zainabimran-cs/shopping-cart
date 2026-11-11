@@ -1,5 +1,4 @@
-"use client";  //Component ko Client Component banata hai.
-
+"use client";
 import { Provider } from "react-redux";
 import { store } from "./store";
 

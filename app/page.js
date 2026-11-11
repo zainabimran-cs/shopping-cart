@@ -27,15 +27,17 @@ export default function Home() {
   return <p>Loading products...</p>;
 }
 
+
 if (isError) {
   return <p>Error: {error.message}</p>;
 }
   return (
-    <div className="max-w-2xl mx-auto p-6 min-h-screen bg-gray-50">
+    <div className="max-w-2xl mx-auto p-6 min-h-screen  bg-gray-50  ">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
 
-      {products.map((product) => (
-        <div key={product.id} className="bg-white rounded-xl shadow p-5 mb-6">
+<div className="grid grid-cols-3 gap-4">
+   {products.map((product) => (
+        <div key={product._id} className="bg-white rounded-xl shadow p-5 mb-6 ">
           <h2 className="text-xl font-semibold text-gray-800">
             {product.name}
           </h2>
@@ -50,8 +52,10 @@ if (isError) {
         </div>
       ))}
 
+</div>
+     
       {cartItems.map((item) => (
-        <div key={item.id} className="bg-white rounded-xl shadow p-5 mb-4">
+        <div key={item._id} className="bg-white rounded-xl shadow p-5 mb-4">
           <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
 
           <p className="text-gray-600 mt-1 mb-4">Price: Rs. {item.price}</p>
@@ -59,7 +63,7 @@ if (isError) {
           <div className="flex items-center gap-3">
             <button
               className="w-9 h-9 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
-              onClick={() => dispatch(incrementQuantity(item.id))}
+              onClick={() => dispatch(incrementQuantity(item._id))}
             >
               +
             </button>
@@ -71,14 +75,14 @@ if (isError) {
 
             <button
               className="w-9 h-9 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
-              onClick={() => dispatch(decrementQuantity(item.id))}
+              onClick={() => dispatch(decrementQuantity(item._id))}
             >
               -
             </button>
 
             <button
               className="ml-auto bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition"
-              onClick={() => dispatch(removeFromCart(item.id))}
+              onClick={() => dispatch(removeFromCart(item._id))}
             >
               Remove
             </button>
