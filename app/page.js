@@ -6,12 +6,16 @@ import {
   removeFromCart,
   incrementQuantity,
   decrementQuantity,
+  selectCartTotal,
+  selectCartCount,
 } from "./redux/cartSlice";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "../services/productService";
 
 export default function Home() {
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const cartTotal = useSelector(selectCartTotal);
+const cartCount = useSelector(selectCartCount);
 
   const dispatch = useDispatch();
   const {
@@ -34,6 +38,10 @@ if (isError) {
   return (
     <div className="max-w-2xl mx-auto p-6 min-h-screen  bg-gray-50  ">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Shopping Cart</h1>
+      <div className="bg-white rounded-xl shadow p-4 mb-6">
+  <p>Total Items: {cartCount}</p>
+  <p>Total Price: Rs. {cartTotal}</p>
+</div>
 
 <div className="grid grid-cols-3 gap-4">
    {products.map((product) => (
