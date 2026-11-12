@@ -1,6 +1,6 @@
 function handleError(response, data) {
   if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch products");
+    throw new Error(data?.message || "Failed to fetch products");
   }
 }
 
