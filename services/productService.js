@@ -6,7 +6,8 @@ function handleError(response, data) {
 
 export async function getProducts() {
   const response = await fetch("/api/products");
-  const data = await response.json();
+
+  const data = await response.json().catch(() => null);
 
   handleError(response, data);
 
