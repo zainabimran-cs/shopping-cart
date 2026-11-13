@@ -1,6 +1,6 @@
-function handleError(response, data) {
+function handleError(response, data, errorMessage) {
   if (!response.ok) {
-    throw new Error(data?.message || "Failed to fetch products");
+    throw new Error(data?.message || errorMessage);
   }
 }
 
@@ -9,7 +9,7 @@ export async function getProducts() {
 
   const data = await response.json().catch(() => null);
 
-  handleError(response, data);
+  handleError(response, data, "Failed to fetch products");
 
   return data;
 }
@@ -17,12 +17,12 @@ export async function getProducts() {
 export async function addProduct(product) {
   const response = await fetch("/api/products",{
     method:"POST",
-    header: {
+    headers: {
     "Content-Type": "application/json"
     },
     body:JSON.stringify(product)
   });
   const data = await response.json().catch(()=>null);
-  handleError(response,data);
+  handleError(response,data, "Failed to add Product");
   return data;
 }

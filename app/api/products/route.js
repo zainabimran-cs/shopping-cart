@@ -30,8 +30,8 @@ export async function POST(request) {
     }
     const { db } = await connectToDatabase();
     const newProduct = {
-      name: body.name,
-      price: body.price,
+      name: result.data.name,
+      price: result.data.price,
     };
     const response = await db.collection("products").insertOne(newProduct);
     return NextResponse.json(
@@ -44,7 +44,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("POST PRODUCT ERROR:" ,error);
     return NextResponse.json(
-      { message: error.message },
+      { message: "Failed to add product" },
       { status: 500 },
     );
   }
