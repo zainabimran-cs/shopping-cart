@@ -1,16 +1,15 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addProduct } from "@/services/productService";
 
 export default function AdminPage() {
-
-  
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  
+  const [successMessage, setSuccessMessage] = useState("");
+
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -19,34 +18,46 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setName("");
       setPrice("");
-      alert("Product added successfully");
+      setSuccessMessage("Product added successfully!");
     },
   });
 
-
   const { data: session, status } = useSession();
 
-if (status === "loading") {
-  return <p>Loading...</p>;
-}
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
 
-if (!session) {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-      <h1 className="text-xl font-bold">Please sign in</h1>
-      <button
-        onClick={() => signIn("github")}
-        className="bg-gray-900 text-white px-6 py-3 rounded-lg"
-      >
-        Sign in with GitHub
-      </button>
-    </div>
-  );
-}
+  if (!session) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <h1 className="text-xl font-bold">Please sign in</h1>
+        <button
+          onClick={() => signIn("github")}
+          className="bg-gray-900 text-white px-6 py-3 rounded-lg"
+        >
+          Sign in with GitHub
+        </button>
+      </div>
+    );
+  }
 
-if (!session.user?.isAdmin) {
-  return <p>Not allowed</p>;
-}
+  if (!session.user?.isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p>Signed in as {session.user?.email}</p>
+        <h1 className="text-xl font-bold">
+          You don&apos;t have permission to access this page.
+        </h1>
+        <button
+          onClick={() => signOut()}
+          className="bg-gray-900 text-white px-6 py-3 rounded-lg"
+        >
+          Sign out
+        </button>
+      </div>
+    );
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -60,6 +71,18 @@ if (!session.user?.isAdmin) {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-sm text-gray-600">
+            Signed in as {session.user?.email}
+          </p>
+
+          <button
+            onClick={() => signOut()}
+            className="bg-gray-900 text-white px-2 py-2 rounded-lg"
+          >
+            Sign out
+          </button>
+        </div>
         <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
           Add Product
         </h1>
@@ -102,6 +125,11 @@ if (!session.user?.isAdmin) {
           {mutation.isError && (
             <p className="text-sm text-red-600 text-center">
               {mutation.error.message}
+            </p>
+          )}
+          {successMessage && (
+            <p className="text-sm text-green-600 text-center">
+              {successMessage}
             </p>
           )}
         </form>
