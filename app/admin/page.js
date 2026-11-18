@@ -8,7 +8,6 @@ import { addProduct } from "@/services/productService";
 export default function AdminPage() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -18,7 +17,6 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setName("");
       setPrice("");
-      setSuccessMessage("Product added successfully!");
     },
   });
 
@@ -127,9 +125,9 @@ export default function AdminPage() {
               {mutation.error.message}
             </p>
           )}
-          {successMessage && (
+          {mutation.isSuccess && (
             <p className="text-sm text-green-600 text-center">
-              {successMessage}
+              Product added successfully!
             </p>
           )}
         </form>
