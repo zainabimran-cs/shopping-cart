@@ -1,22 +1,9 @@
-
 import { connectToDatabase } from "@/lib/mongodb";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import { z } from "zod";
-
-// Validate cart items
-const orderSchema = z.object({
-  items: z
-    .array(
-      z.object({
-        productId: z.string().min(1),
-        quantity: z.number().int().positive(),
-      }),
-    )
-    .min(1, "Cart cannot be empty"),
-});
+import { createOrderSchema } from "@/validations/orderValidation";
 
 // GET: Fetch logged-in user's orders
 export async function GET() {
@@ -72,7 +59,7 @@ export async function POST(request) {
       );
     }
 
-    const result = orderSchema.safeParse(body);
+    const result = createOrderSchema.safeParse(body);
 
     if (!result.success) {
       return NextResponse.json(
@@ -92,18 +79,25 @@ export async function POST(request) {
 
     const { db } = await connectToDatabase();
 
-    const productIds = items.map(
-      (item) => new ObjectId(item.productId),
-    );
+    const productIds = items.map((item) => new ObjectId(item.productId));
 
     const products = await db
       .collection("products")
       .find({ _id: { $in: productIds } })
       .toArray();
 
-    if (products.length !== items.length) {
+    const missingProducts = items.filter(
+      (item) =>
+        !products.some((product) => product._id.toString() === item.productId),
+    );
+
+    if (missingProducts.length > 0) {
       return NextResponse.json(
-        { message: "One or more products are no longer available" },
+        {
+          message: `Products no longer available: ${missingProducts
+            .map((item) => item.productId)
+            .join(", ")}`,
+        },
         { status: 409 },
       );
     }
@@ -122,21 +116,17 @@ export async function POST(request) {
       };
     });
 
-    const total = orderItems.reduce(
-      (sum, item) => sum + item.subtotal,
-      0,
-    );
+    const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
 
     const newOrder = {
       userEmail: session.user.email,
       items: orderItems,
       total,
+      status: "pending",
       createdAt: new Date(),
     };
 
-    const response = await db
-      .collection("orders")
-      .insertOne(newOrder);
+    const response = await db.collection("orders").insertOne(newOrder);
 
     return NextResponse.json(
       {

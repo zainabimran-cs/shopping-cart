@@ -10,10 +10,16 @@ export const createOrderSchema = z
             quantity: z
               .number()
               .int()
-              .positive("Quantity must be a positive integer"),
+              .min(1, "Quantity must be at least 1")
+              .max(10, "Quantity cannot exceed 10"),
           })
           .strict(),
       )
-      .min(1, "Cart cannot be empty"),
+      .min(1, "Cart cannot be empty")
+      .refine(
+        (items) =>
+          new Set(items.map((item) => item.productId)).size === items.length,
+        "Duplicate products are not allowed",
+      ),
   })
   .strict();
