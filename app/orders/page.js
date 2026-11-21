@@ -38,9 +38,11 @@ export default function OrdersPage() {
               </p>
 
               <p className="text-sm text-gray-500">
-                Order Date: 
-                <span className="font-medium text-gray-800"> {new Date(order.createdAt).toLocaleString()}</span>
-               
+                Order Date:
+                <span className="font-medium text-gray-800">
+                  {" "}
+                  {new Date(order.createdAt).toLocaleString()}
+                </span>
               </p>
 
               <div>

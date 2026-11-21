@@ -21,15 +21,29 @@ export default function CartPersistence() {
         const parsedCart = JSON.parse(savedCart);
 
         if (Array.isArray(parsedCart)) {
-          dispatch(setCart(parsedCart));
+          const convertedCart = parsedCart
+            .map((item) => ({
+              productId: item.productId || item._id,
+              quantity: item.quantity,
+            }))
+            .filter(
+              (item) =>
+                typeof item.productId === "string" &&
+                item.productId.trim() !== "" &&
+                Number.isInteger(item.quantity) &&
+                item.quantity >= 1 &&
+                item.quantity <= 10
+            );
+
+          dispatch(setCart(convertedCart));
         }
       }
     } catch (error) {
       console.error("Error loading cart:", error);
-  }
+      dispatch(setCart([]));
+    }
   }, [dispatch]);
 
-  
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;

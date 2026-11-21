@@ -89,7 +89,25 @@ export default function Home() {
           (product) => product._id === item.productId,
         );
 
-        if (!product) return null;
+        if (!product) {
+          return (
+            <div
+              key={item.productId}
+              className="bg-white rounded-xl shadow p-5 mb-4"
+            >
+              <p className="text-red-600 font-medium mb-3">
+                This product is unavailable.
+              </p>
+
+              <button
+                className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition"
+                onClick={() => dispatch(removeFromCart(item.productId))}
+              >
+                Remove
+              </button>
+            </div>
+          );
+        }
 
         return (
           <div
@@ -106,8 +124,9 @@ export default function Home() {
 
             <div className="flex items-center gap-3">
               <button
-                className="w-9 h-9 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition"
+                className="w-9 h-9 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => dispatch(incrementQuantity(item.productId))}
+                disabled={item.quantity >= 10}
               >
                 +
               </button>
