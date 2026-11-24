@@ -4,9 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getOrders } from "../../services/orderService";
 import { useSession, signIn } from "next-auth/react";
 
-
 export default function OrdersPage() {
-const { status } = useSession();
+  const { status } = useSession();
 
   const {
     data: orders = [],
