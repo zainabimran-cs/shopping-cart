@@ -38,10 +38,12 @@ export async function GET() {
 
 // POST: Create a new order
 export async function POST(request) {
-  try {
-    const session = await getServerSession(authOptions);
+  let mongoSession;
 
-    if (!session?.user?.email) {
+  try {
+    const userSession = await getServerSession(authOptions);
+
+    if (!userSession?.user?.email) {
       return NextResponse.json(
         { message: "Please sign in first" },
         { status: 401 },
@@ -77,71 +79,135 @@ export async function POST(request) {
       );
     }
 
-    const { db } = await connectToDatabase();
+    const { db, client } = await connectToDatabase();
+    mongoSession = client.startSession();
 
-    const productIds = items.map((item) => new ObjectId(item.productId));
+    let newOrder;
+    let orderId;
 
-    const products = await db
-      .collection("products")
-      .find({ _id: { $in: productIds } })
-      .toArray();
+    await mongoSession.withTransaction(async () => {
+      const productIds = items.map((item) => new ObjectId(item.productId));
 
-    const missingProducts = items.filter(
-      (item) =>
-        !products.some((product) => product._id.toString() === item.productId),
-    );
+      const products = await db
+        .collection("products")
+        .find({ _id: { $in: productIds } }, { session: mongoSession })
+        .toArray();
 
-    if (missingProducts.length > 0) {
-      return NextResponse.json(
-        {
-          message: `Products no longer available: ${missingProducts
-            .map((item) => item.productId)
-            .join(", ")}`,
-        },
-        { status: 409 },
-      );
-    }
-
-    const orderItems = items.map((item) => {
-      const product = products.find(
-        (product) => product._id.toString() === item.productId,
+      const missingProducts = items.filter(
+        (item) =>
+          !products.some(
+            (product) => product._id.toString() === item.productId,
+          ),
       );
 
-      return {
-        productId: product._id,
-        name: product.name,
-        price: product.price,
-        quantity: item.quantity,
-        subtotal: product.price * item.quantity,
+      if (missingProducts.length > 0) {
+        const error = new Error("Product no longer available");
+        error.code = "PRODUCT_NOT_FOUND";
+        error.productId = missingProducts[0].productId;
+        throw error;
+      }
+
+      // Reduce stock using one conditional update
+      for (const item of items) {
+        const stockUpdate = await db.collection("products").updateOne(
+          {
+            _id: new ObjectId(item.productId),
+            stock: { $gte: item.quantity },
+          },
+          {
+            $inc: { stock: -item.quantity },
+          },
+          { session: mongoSession },
+        );
+
+        if (stockUpdate.matchedCount === 0) {
+          const product = products.find(
+            (p) => p._id.toString() === item.productId,
+          );
+
+          const latestProduct = await db
+            .collection("products")
+            .findOne(
+              { _id: new ObjectId(item.productId) },
+              { session: mongoSession },
+            );
+
+          const error = new Error("Insufficient stock");
+          error.code = "INSUFFICIENT_STOCK";
+          error.productId = item.productId;
+          error.productName = product?.name;
+          error.stockLeft = latestProduct?.stock ?? 0;
+          throw error;
+        }
+      }
+
+      const orderItems = items.map((item) => {
+        const product = products.find(
+          (p) => p._id.toString() === item.productId,
+        );
+
+        return {
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: item.quantity,
+          subtotal: product.price * item.quantity,
+        };
+      });
+
+      const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+
+      newOrder = {
+        userEmail: userSession.user.email,
+        items: orderItems,
+        total,
+        status: "pending",
+        createdAt: new Date(),
       };
+
+      // Save order in the same transaction
+      const response = await db.collection("orders").insertOne(newOrder, {
+        session: mongoSession,
+      });
+
+      orderId = response.insertedId;
     });
-
-    const total = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
-
-    const newOrder = {
-      userEmail: session.user.email,
-      items: orderItems,
-      total,
-      status: "pending",
-      createdAt: new Date(),
-    };
-
-    const response = await db.collection("orders").insertOne(newOrder);
 
     return NextResponse.json(
       {
         message: "Order placed successfully",
-        orderId: response.insertedId,
-        total,
+        orderId,
+        total: newOrder.total,
       },
       { status: 201 },
     );
   } catch (error) {
     console.error("POST ORDER ERROR:", error);
 
+    if (
+      error.code === "INSUFFICIENT_STOCK" ||
+      error.code === "PRODUCT_NOT_FOUND"
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            error.code === "INSUFFICIENT_STOCK"
+              ? "Not enough stock available"
+              : "Product no longer available",
+          product: error.productName ?? error.productId,
+          stockLeft: error.stockLeft ?? 0,
+        },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json(
       { message: "Failed to place order" },
       { status: 500 },
     );
+  } finally {
+    if (mongoSession) {
+      await mongoSession.endSession();
+    }
   }
 }
