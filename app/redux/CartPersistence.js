@@ -7,9 +7,7 @@ import { setCart } from "./cartSlice";
 export default function CartPersistence() {
   const dispatch = useDispatch();
 
-  const cartItems = useSelector(
-    (state) => state.cart.cartItems
-  );
+  const cartItems = useSelector((state) => state.cart.cartItems);
 
   const isFirstRender = useRef(true);
 
@@ -32,7 +30,7 @@ export default function CartPersistence() {
                 item.productId.trim() !== "" &&
                 Number.isInteger(item.quantity) &&
                 item.quantity >= 1 &&
-                item.quantity <= 10
+                item.quantity <= 10,
             );
 
           dispatch(setCart(convertedCart));
@@ -50,10 +48,7 @@ export default function CartPersistence() {
       return;
     }
 
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(cartItems)
-    );
+    localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
   return null;

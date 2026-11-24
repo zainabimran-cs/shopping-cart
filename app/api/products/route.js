@@ -1,4 +1,3 @@
-
 import { connectToDatabase } from "@/lib/mongodb";
 import { registerProductSchema } from "@/validations/productValidation";
 import { NextResponse } from "next/server";
@@ -35,10 +34,7 @@ export async function POST(request) {
 
     // Step 2: Check admin access
     if (!isAdmin(session.user?.email)) {
-      return NextResponse.json(
-        { message: "Not allowed" },
-        { status: 403 },
-      );
+      return NextResponse.json({ message: "Not allowed" }, { status: 403 });
     }
 
     // Step 3: Check valid JSON

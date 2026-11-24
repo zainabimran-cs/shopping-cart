@@ -2,8 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getOrders } from "../../services/orderService";
+import { useSession, signIn } from "next-auth/react";
 
 export default function OrdersPage() {
+  const { status } = useSession();
+
   const {
     data: orders = [],
     isLoading,
@@ -12,7 +15,31 @@ export default function OrdersPage() {
   } = useQuery({
     queryKey: ["orders"],
     queryFn: getOrders,
+    enabled: status === "authenticated",
   });
+
+  if (status === "loading") {
+    return <p>Checking login status...</p>;
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="max-w-4xl mx-auto p-6 min-h-screen">
+        <h1 className="text-2xl font-bold mb-4">My Orders</h1>
+
+        <p className="text-gray-600 mb-4">
+          Please sign in to view your orders.
+        </p>
+
+        <button
+          onClick={() => signIn("github")}
+          className="bg-gray-900 text-white px-6 py-3 rounded-lg"
+        >
+          Sign In
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <p>Loading orders...</p>;
