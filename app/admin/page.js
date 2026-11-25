@@ -8,6 +8,7 @@ import { addProduct } from "@/services/productService";
 export default function AdminPage() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -17,6 +18,7 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setName("");
       setPrice("");
+      setStock("");
     },
   });
 
@@ -63,6 +65,7 @@ export default function AdminPage() {
     mutation.mutate({
       name,
       price: Number(price),
+      stock: Number(stock),
     });
   }
 
@@ -108,6 +111,21 @@ export default function AdminPage() {
               placeholder="Enter product price"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Product Stock
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Enter available stock"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
             />
           </div>

@@ -103,11 +103,15 @@ export async function POST(request) {
       if (missingProducts.length > 0) {
         const error = new Error("Product no longer available");
         error.code = "PRODUCT_NOT_FOUND";
-        error.productId = missingProducts[0].productId;
+        error.products = missingProducts.map((item) => ({
+          productId: item.productId,
+        }));
         throw error;
       }
 
       // Reduce stock using one conditional update
+      const insufficientProducts = [];
+
       for (const item of items) {
         const stockUpdate = await db.collection("products").updateOne(
           {
@@ -132,13 +136,19 @@ export async function POST(request) {
               { session: mongoSession },
             );
 
-          const error = new Error("Insufficient stock");
-          error.code = "INSUFFICIENT_STOCK";
-          error.productId = item.productId;
-          error.productName = product?.name;
-          error.stockLeft = latestProduct?.stock ?? 0;
-          throw error;
+          insufficientProducts.push({
+            productId: item.productId,
+            name: product?.name ?? "Unknown product",
+            stockLeft: latestProduct?.stock ?? 0,
+          });
         }
+      }
+
+      if (insufficientProducts.length > 0) {
+        const error = new Error("Insufficient stock");
+        error.code = "INSUFFICIENT_STOCK";
+        error.products = insufficientProducts;
+        throw error;
       }
 
       const orderItems = items.map((item) => {
@@ -184,18 +194,25 @@ export async function POST(request) {
   } catch (error) {
     console.error("POST ORDER ERROR:", error);
 
-    if (
-      error.code === "INSUFFICIENT_STOCK" ||
-      error.code === "PRODUCT_NOT_FOUND"
-    ) {
+    if (error.code === "INSUFFICIENT_STOCK") {
       return NextResponse.json(
         {
-          message:
-            error.code === "INSUFFICIENT_STOCK"
-              ? "Not enough stock available"
-              : "Product no longer available",
-          product: error.productName ?? error.productId,
-          stockLeft: error.stockLeft ?? 0,
+          message: error.products
+            .map(
+              (product) => `Only ${product.stockLeft} left of ${product.name}`,
+            )
+            .join(", "),
+          products: error.products,
+        },
+        { status: 409 },
+      );
+    }
+
+    if (error.code === "PRODUCT_NOT_FOUND") {
+      return NextResponse.json(
+        {
+          message: "Some products are no longer available",
+          products: error.products,
         },
         { status: 409 },
       );

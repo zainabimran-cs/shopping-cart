@@ -65,6 +65,7 @@ export async function POST(request) {
     const newProduct = {
       name: result.data.name,
       price: result.data.price,
+      stock: result.data.stock,
     };
 
     const response = await db.collection("products").insertOne(newProduct);
