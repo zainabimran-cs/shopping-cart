@@ -1,6 +1,8 @@
 function handleError(response, data, errorMessage) {
   if (!response.ok) {
-    throw new Error(data?.message || errorMessage);
+    const error = new Error(data?.message || errorMessage);
+    error.status = response.status;
+    throw error;
   }
 }
 

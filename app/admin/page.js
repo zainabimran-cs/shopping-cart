@@ -65,7 +65,7 @@ export default function AdminPage() {
     mutation.mutate({
       name,
       price: Number(price),
-      stock: Number(stock),
+      stock: stock === "" ? undefined : Number(stock),
     });
   }
 

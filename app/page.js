@@ -10,7 +10,7 @@ import {
   selectCartCount,
   clearCart,
 } from "./redux/cartSlice";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createOrder } from "../services/orderService";
 import { getProducts } from "../services/productService";
 import { useState } from "react";
@@ -22,6 +22,7 @@ export default function Home() {
   const [showEmptyCartMessage, setShowEmptyCartMessage] = useState(false);
 
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const {
     data: products = [],
@@ -37,6 +38,12 @@ export default function Home() {
     mutationFn: createOrder,
     onSuccess: () => {
       dispatch(clearCart());
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (error) => {
+      if (error.status === 409) {
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+      }
     },
   });
 
