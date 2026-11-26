@@ -9,4 +9,9 @@ export const registerProductSchema = z.object({
   price: z
     .number({ message: "Price is required" })
     .positive({ message: "Price must be a positive number" }),
+
+  stock: z
+    .number({ message: "Stock is required" })
+    .int({ message: "Stock must be a whole number" })
+    .min(0, { message: "Stock cannot be negative" }),
 });

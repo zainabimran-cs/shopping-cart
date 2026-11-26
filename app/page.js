@@ -10,7 +10,7 @@ import {
   selectCartCount,
   clearCart,
 } from "./redux/cartSlice";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createOrder } from "../services/orderService";
 import { getProducts } from "../services/productService";
 import { useState } from "react";
@@ -22,6 +22,7 @@ export default function Home() {
   const [showEmptyCartMessage, setShowEmptyCartMessage] = useState(false);
 
   const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const {
     data: products = [],
@@ -37,6 +38,12 @@ export default function Home() {
     mutationFn: createOrder,
     onSuccess: () => {
       dispatch(clearCart());
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (error) => {
+      if (error.status === 409) {
+        queryClient.invalidateQueries({ queryKey: ["products"] });
+      }
     },
   });
 
@@ -64,30 +71,44 @@ export default function Home() {
       </Link>
 
       <div className="grid grid-cols-3 gap-4">
-        {products.map((product) => (
-          <div
-            key={product._id}
-            className="bg-white rounded-xl shadow p-5 mb-6 "
-          >
-            <h2 className="text-xl font-semibold text-gray-800">
-              {product.name}
-            </h2>
-            <p className="text-gray-600 mt-1 mb-4">
-              Price: Rs. {product.price}
-            </p>
+        {products.map((product) => {
+          const outOfStock = product.stock <= 0;
 
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-lg transition"
-              onClick={() => {
-                setShowEmptyCartMessage(false);
-                orderMutation.reset();
-                dispatch(addToCart(product));
-              }}
+          return (
+            <div
+              key={product._id}
+              className="bg-white rounded-xl shadow p-5 mb-6"
             >
-              Add to Cart
-            </button>
-          </div>
-        ))}
+              <h2 className="text-xl font-semibold text-gray-800">
+                {product.name}
+              </h2>
+
+              <p className="text-gray-600 mt-1 mb-2">
+                Price: Rs. {product.price}
+              </p>
+
+              <p className="text-sm font-medium mb-4">
+                {outOfStock ? "Out of stock" : `Only ${product.stock} left`}
+              </p>
+
+              <button
+                disabled={outOfStock}
+                className={`font-medium px-5 py-2 rounded-lg transition text-white ${
+                  outOfStock
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                onClick={() => {
+                  setShowEmptyCartMessage(false);
+                  orderMutation.reset();
+                  dispatch(addToCart(product));
+                }}
+              >
+                {outOfStock ? "Out of Stock" : "Add to Cart"}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {cartItems.map((item) => {
